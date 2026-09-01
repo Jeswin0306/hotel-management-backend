@@ -1,0 +1,104 @@
+import { Booking, checkGuestExists, checkRoomAvailable, checkRoomExists, checkRoomCapacity, checkPricePerNight, createBooking } from "../models/booking.model";
+
+export const createRoomBooking = async (booking : Booking) => {
+  if(
+    !booking.guest_id ||
+    !booking.room_id ||
+    !booking.check_in_date ||
+    !booking.check_out_date ||
+    !booking.number_of_guests 
+  ){
+    throw new Error ("Required field are missing");
+  }
+
+//check guest exists
+
+  const guestExists = await checkGuestExists(booking.guest_id);
+
+  if((guestExists as any []).length === 0){
+    throw new Error ("Guest not found");
+  }
+
+//check room exists
+
+  const roomExists = await checkRoomExists(booking.room_id);
+
+  if((roomExists as any[]).length === 0){
+    throw new Error('Room not found');
+  }
+
+//check room avaliable
+
+  const roomAvailable = await checkRoomAvailable(booking.room_id);
+
+  const checkRoom = (roomAvailable as any[])[0];
+
+  if(!checkRoom){
+    throw new Error("Room not found");
+  }
+
+  if(checkRoom.status !== "AVAILABLE"){
+    throw new Error("Room is not available");
+  }
+
+//check date
+
+  const checkInDate = new Date(booking.check_in_date);
+  const checkOutDate = new Date(booking.check_out_date);
+
+  if(checkInDate >= checkOutDate){
+    throw new Error ("Invalid check-in and check-out date");
+  }
+
+// check room capacity
+
+  const roomCapacity = await checkRoomCapacity(booking.room_id);
+
+  const room = (roomCapacity as any [])[0];
+
+  if(!room){
+    throw new Error("Room capcity not found")
+  }
+
+  if(booking.number_of_guests > room.capacity){
+    throw new Error ("Number of guest exceeds");
+  }
+
+// number of night calculation
+
+  const checkIn = new Date (booking.check_in_date);
+  const checkOut = new Date (booking.check_out_date);
+
+  const differenceInTime = checkOut.getTime() - checkIn.getTime();
+
+  const numberOfNight = differenceInTime/(1000 * 60  * 60 * 24);
+
+//add room price
+
+  const roomPrice = await checkPricePerNight(booking.room_id);
+
+  const price = (roomPrice as any [])[0];
+
+  if(!price){
+    throw new Error("Room price not found");
+  }
+
+  const total_amount = price.price_per_night * numberOfNight;
+
+//add booking to database
+
+  const bookingData : Booking = {
+    guest_id : booking.guest_id,
+    room_id : booking.room_id,
+    check_in_date : booking.check_in_date,
+    check_out_date : booking.check_out_date,
+    number_of_guests : booking.number_of_guests,
+    total_amount : total_amount,
+    booking_status : 'CONFIRMED'
+  }; 
+
+  const  result  = await createBooking(bookingData);
+  return result;
+};
+
+
