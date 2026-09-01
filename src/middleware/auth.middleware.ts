@@ -25,7 +25,7 @@ export const authenticateToken = (req : Request, res : Response, next : NextFunc
       process.env.JWT_SECRET as string
     );
 
-    // console.log('Decoded token: ',decoded);
+    console.log('Decoded token: ',decoded);
 
     (req as any).user = decoded;
     next();
@@ -39,3 +39,22 @@ export const authenticateToken = (req : Request, res : Response, next : NextFunc
     });
   }
 }; 
+
+export const authorizeRole = (allowedRole : string) => {
+  return (req : Request, res : Response, next : NextFunction) => {
+    const user = (req as any).user;
+
+    if(!user){
+      return res.status(401).json({
+        message : "Unauthorized"
+      });
+    }
+
+  if(user.role !== allowedRole){
+    return res.status(403).json({
+      message : "Access denied"
+    });
+  }
+  next();
+  }
+}
