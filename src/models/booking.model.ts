@@ -106,6 +106,8 @@ export const updateRoomStatus = async(roomId : number, status : string) => {
   return rows;
 };
 
+//get all booking details
+
 export const getAllBooking = async () => {
   const sql = `
   SELECT * 
@@ -114,7 +116,20 @@ export const getAllBooking = async () => {
 
   const [ rows ] = await db.execute(sql);
   return rows;
-}
+};
+
+//get booking by id
+
+export const getBookingById = async (bookingId : number) => {
+  const sql = `
+  SELECT *
+  FROM bookings
+  WHERE booking_id = ?
+  `;
+
+  const [ rows ] = await db.execute(sql, [bookingId]);
+  return rows;
+};
 
 export const updateBookingStatus = async (bookingId : number, status : string) => {
   const sql = `
@@ -129,3 +144,20 @@ export const updateBookingStatus = async (bookingId : number, status : string) =
   ]);
   return rows;
 };
+
+//update booking
+
+export const updateBooking = async (bookingId : number, booking : Booking) => {
+  const sql = `
+  UPDATE bookings
+  SET check_in_date = ?, check_out_date = ?, number_of_guests = ?
+  WHERE booking_id = ?
+  `;
+
+  const [ rows ] = await db.execute(sql,[
+    booking.check_in_date,
+    booking.check_out_date,
+    booking.number_of_guests
+  ]); 
+  return rows;
+}

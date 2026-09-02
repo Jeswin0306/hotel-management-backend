@@ -1,4 +1,4 @@
-import { Booking, checkGuestExists, checkRoomAvailable, checkRoomExists, checkRoomCapacity, checkPricePerNight, createBooking, checkRoomAlreadyBooked, updateRoomStatus, updateBookingStatus, getAllBooking } from "../models/booking.model";
+import { Booking, checkGuestExists, checkRoomAvailable, checkRoomExists, checkRoomCapacity, checkPricePerNight, createBooking, checkRoomAlreadyBooked, updateRoomStatus, updateBookingStatus, getAllBooking, getBookingById, updateBooking } from "../models/booking.model";
 
 export const createRoomBooking = async (booking : Booking) => {
   if(
@@ -118,8 +118,69 @@ export const getBookingDetails  = async () => {
   return result;
 };
 
-// export const checkOutBooking = async (bookingId : number) => {
-//   const booking = await
-// }
+//get booking by id
+
+export const getBoookingId = async (bookingId : number) => {
+  const result = await getBookingById(bookingId);
+  return result;
+};
+
+//checkout
+
+export const checkOutBooking = async (bookingId : number) => {
+  
+  const result = await getBookingById(bookingId);
+
+  if((result as any []).length === 0){
+    throw new Error ("Booking not found");
+  }
+
+  const bookingResult = (result as any[])[0];
+  // console.log(bookingResult);
+
+  if(bookingResult.booking_status !== "CONFIRMED"){
+    throw new Error("Booking is not active")
+  }
+
+  await updateBookingStatus(bookingId, "COMPLETED");
+  await updateRoomStatus(bookingResult.room_id
+    , "AVAILABLE");
+};
+
+//cancel booking
+
+export const cancelBooking = async(bookingId : number) => {
+  const result = await getBookingById(bookingId);
+  
+  const resultBooking = (result as any[])[0];
+
+  if(resultBooking.booking_status !== "CONFIRMED"){
+    throw new Error("Booking is not active")
+  }
+
+  await updateBookingStatus(bookingId, "CANCELED");
+  await updateRoomStatus(resultBooking.room_id, "AVAILABLE");
+};
+
+//update booking
+
+export const updateRoomBooking = async (bookingId : number, booking : Booking) => {
+
+  if(
+    !booking.check_in_date ||
+    !booking.check_out_date ||
+    !booking.number_of_guests
+  ){
+    throw new Error("Required field are missing");
+  }
+
+  const room = await getBookingById(bookingId);
+  if((room as any []).length === 0){
+    throw new Error("Booking  is not found");
+  }
+
+  const result = await updateBooking(bookingId, booking);
+  return result;
+};
 
 
