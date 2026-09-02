@@ -5,8 +5,6 @@ import { Guest } from '../models/guest.model';
 
 //create guest
 
-
-
 export const createGuest = async (req : Request, res : Response) => {
   try {
     const guest:Guest = req.body;

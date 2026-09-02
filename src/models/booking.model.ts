@@ -61,7 +61,21 @@ export const checkPricePerNight = async (roomId : number) => {
 
   const [ rows ] = await db.execute (sql, [roomId]);
   return rows;
-}
+};
+
+export const checkRoomAlreadyBooked = async (roomId : number, checkInDate : string, checkOutDate : string) => {
+  const sql = `
+  SELECT booking_id 
+  FROM bookings
+  WHERE room_id = ?
+  AND booking_status = 'CONFIRMED'
+  AND check_in_date < ?
+  AND check_out_date > ?
+  `;
+
+  const [ rows ] = await db.execute(sql, [roomId, checkOutDate, checkInDate]);
+  return rows;
+};
 
 export const createBooking = async (booking  : Booking) => {
   const sql = `
@@ -77,6 +91,41 @@ export const createBooking = async (booking  : Booking) => {
     booking.number_of_guests,
     booking.total_amount,
     booking.booking_status,
+  ]);
+  return rows;
+};
+
+export const updateRoomStatus = async(roomId : number, status : string) => {
+  const sql = `
+  UPDATE rooms
+  SET status = ?
+  WHERE room_id = ?
+  `;
+
+  const [ rows ] = await db.execute(sql, [status, roomId]);
+  return rows;
+};
+
+export const getAllBooking = async () => {
+  const sql = `
+  SELECT * 
+  FROM bookings;
+  `;
+
+  const [ rows ] = await db.execute(sql);
+  return rows;
+}
+
+export const updateBookingStatus = async (bookingId : number, status : string) => {
+  const sql = `
+  UPDATE bookings
+  SET booking_status = ?
+  WHERE booking_id = ?
+  `;
+
+  const [ rows ] = await db.execute(sql, [
+    status,
+    bookingId
   ]);
   return rows;
 };

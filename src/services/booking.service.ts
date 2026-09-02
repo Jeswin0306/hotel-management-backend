@@ -1,4 +1,4 @@
-import { Booking, checkGuestExists, checkRoomAvailable, checkRoomExists, checkRoomCapacity, checkPricePerNight, createBooking } from "../models/booking.model";
+import { Booking, checkGuestExists, checkRoomAvailable, checkRoomExists, checkRoomCapacity, checkPricePerNight, createBooking, checkRoomAlreadyBooked, updateRoomStatus, updateBookingStatus, getAllBooking } from "../models/booking.model";
 
 export const createRoomBooking = async (booking : Booking) => {
   if(
@@ -50,6 +50,15 @@ export const createRoomBooking = async (booking : Booking) => {
     throw new Error ("Invalid check-in and check-out date");
   }
 
+// check booking
+
+  const existingBooking = await checkRoomAlreadyBooked(booking.room_id, booking
+    .check_in_date, booking.check_out_date);
+
+    if((existingBooking as any[]).length > 0){
+      throw new Error("Room is already booked")
+    }
+
 // check room capacity
 
   const roomCapacity = await checkRoomCapacity(booking.room_id);
@@ -71,7 +80,7 @@ export const createRoomBooking = async (booking : Booking) => {
 
   const differenceInTime = checkOut.getTime() - checkIn.getTime();
 
-  const numberOfNight = differenceInTime/(1000 * 60  * 60 * 24);
+  const numberOfNight = Math.ceil(differenceInTime/(1000 * 60  * 60 * 24));
 
 //add room price
 
@@ -98,7 +107,19 @@ export const createRoomBooking = async (booking : Booking) => {
   }; 
 
   const  result  = await createBooking(bookingData);
+  await updateRoomStatus(booking.room_id, "BOOKED");
   return result;
 };
+
+//get all booking
+
+export const getBookingDetails  = async () => {
+  const result = await getAllBooking();
+  return result;
+};
+
+// export const checkOutBooking = async (bookingId : number) => {
+//   const booking = await
+// }
 
 
