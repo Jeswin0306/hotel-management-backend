@@ -1,4 +1,4 @@
-import { Booking, checkGuestExists, checkRoomAvailable, checkRoomExists, checkRoomCapacity, checkPricePerNight, createBooking, checkRoomAlreadyBooked, updateRoomStatus, updateBookingStatus, getAllBooking, getBookingById, updateBooking } from "../models/booking.model";
+import { Booking, checkGuestExists, checkRoomAvailable, checkRoomExists, checkRoomCapacity, checkPricePerNight, createBooking, checkRoomAlreadyBooked, updateRoomStatus, updateBookingStatus, getAllBooking, getBookingById, updateBooking, checkRoomAlreadyBookedForUpdate } from "../models/booking.model";
 
 export const createRoomBooking = async (booking : Booking) => {
   if(
@@ -174,13 +174,67 @@ export const updateRoomBooking = async (bookingId : number, booking : Booking) =
     throw new Error("Required field are missing");
   }
 
-  const room = await getBookingById(bookingId);
-  if((room as any []).length === 0){
-    throw new Error("Booking  is not found");
+  const existingBooking = await getBookingById(bookingId);
+
+  const oldBooking = (existingBooking as any[])[0];
+  if(!oldBooking){
+    throw new Error("Booking not found");
   }
 
-  const result = await updateBooking(bookingId, booking);
-  return result;
+  if(oldBooking.booking_status !== "CONFIRMED"){
+    throw new Error("Booking is not active");
+  }
+
+  const checkIn = new Date(booking.check_in_date);
+  const checkOut = new Date(booking.check_out_date);
+
+  if(checkIn >= checkOut){
+    throw new Error("Invalid chech-In and check_out date");
+  }
+
+  const roomCapacity = await checkRoomCapacity(oldBooking.room_id);
+
+  const room = (roomCapacity as any[])[0];
+  if(!room){
+    throw new Error("room capacity not found");
+  }
+
+  if(booking.number_of_guests > room.number_of_guests){
+    throw new Error("Nuumber of guest exceed room capacity");
+  }
+
+  const existingOverlap = await checkRoomAlreadyBookedForUpdate(oldBooking.room_id, bookingId,booking.check_in_date, booking.check_out_date);
+
+  if((existingOverlap as any []).length > 0){
+    throw new Error("Room is already booked for these days");
+  }
+
+  const differenceInTime = checkOut.getTime() - checkIn.getTime();
+
+  const numberOfNight =Math.ceil(differenceInTime/(1000 * 60 * 60 * 24));
+
+  const roomPrice = await checkPricePerNight(oldBooking.room_id);
+
+  const priceData =(roomPrice as any[])[0];
+
+  if(!priceData){
+    throw new Error("Price not found");
+  }
+
+  const total_amount = priceData.price_per_night * numberOfNight;
+
+  const result = await updateBooking(bookingId, booking, total_amount);
+
+  return{
+    booking_id : bookingId,
+    roomId : oldBooking.room_id,
+    guest_id: oldBooking.guest_id,
+    check_in_date: booking.check_in_date,
+    check_out_date: booking.check_out_date,
+    number_of_guests: booking.number_of_guests,
+    total_amount: total_amount,
+    booking_status: oldBooking.booking_status
+  }
 };
 
 

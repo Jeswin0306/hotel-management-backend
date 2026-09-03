@@ -147,17 +147,40 @@ export const updateBookingStatus = async (bookingId : number, status : string) =
 
 //update booking
 
-export const updateBooking = async (bookingId : number, booking : Booking) => {
+export const checkRoomAlreadyBookedForUpdate = async (roomId : number, bookingId: number, checkInDate : string, checkOutDate : string) =>{
+  const sql = `
+    SELECT booking_id
+    FROM bookings
+    WHERE room_id = ?
+      AND booking_id != ?
+      AND booking_status = 'CONFIRMED'
+      AND check_in_date < ?
+      AND check_out_date > ?
+  `;
+
+  const [rows] = await db.execute(sql, [
+    roomId,
+    bookingId,
+    checkOutDate,
+    checkInDate
+  ]);
+
+  return rows;
+};
+
+export const updateBooking = async (bookingId : number, booking : Booking, totalAmount : number) => {
   const sql = `
   UPDATE bookings
-  SET check_in_date = ?, check_out_date = ?, number_of_guests = ?
+  SET check_in_date = ?, check_out_date = ?, number_of_guests = ?, total_amount = ?
   WHERE booking_id = ?
   `;
 
   const [ rows ] = await db.execute(sql,[
     booking.check_in_date,
     booking.check_out_date,
-    booking.number_of_guests
+    booking.number_of_guests,
+    totalAmount,
+    bookingId
   ]); 
   return rows;
 }

@@ -187,16 +187,80 @@ export const cancelRoomBookings = async (req : Request, res : Response) => {
 
 //update booking
 
-export const updateBooking = async (req : Request, res : Response) => {
-  try{
-    const id = Number(req.params.id);
+export const updateBookingController = async (req: Request,res: Response) => {
+  try {
+    const bookingId = Number(req.params.id);
 
-    if(isNaN(id)){
+    const booking = req.body;
+
+    const result =
+      await updateRoomBooking(bookingId,booking);
+
+    return res.status(200).json({
+      message: "Booking updated successfully",
+      data: result
+    });
+
+  } catch (error: any) {
+
+    console.log(error);
+
+    if (
+      error.message ===
+      "Required fields are missing"
+    ) {
       return res.status(400).json({
-        message : "Invalid booking ID"
+        message: error.message
       });
     }
 
-    const result = await updateRoomBooking(id)
+    if (
+      error.message ===
+      "Booking not found"
+    ) {
+      return res.status(404).json({
+        message: error.message
+      });
+    }
+
+    if (
+      error.message ===
+      "Booking is not active"
+    ) {
+      return res.status(409).json({
+        message: error.message
+      });
+    }
+
+    if (
+      error.message ===
+      "Invalid check-in and check-out date"
+    ) {
+      return res.status(400).json({
+        message: error.message
+      });
+    }
+
+    if (
+      error.message ===
+      "Number of guests exceeds room capacity"
+    ) {
+      return res.status(400).json({
+        message: error.message
+      });
+    }
+
+    if (
+      error.message ===
+      "Room is already booked for these dates"
+    ) {
+      return res.status(409).json({
+        message: error.message
+      });
+    }
+
+    return res.status(500).json({
+      message: "Failed to update booking"
+    });
   }
-}
+};
