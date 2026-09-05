@@ -54,3 +54,14 @@ export const createPayment = async(payment : Payment) => {
   ]);
   return result;
 };
+
+//get all payment
+
+export const getAllPayment = async (paymentId : number) => {
+  const sql = `
+  SELECT * FROM payments;
+  `;
+
+  const [ result ] = await db.execute(sql, [paymentId]);
+  return result;
+};
