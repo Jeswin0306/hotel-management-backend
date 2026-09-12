@@ -36,7 +36,6 @@ export const checkPaymentExists = async (bookingId : number) => {
 }
 
 //create payment
-
 export const createPayment = async(payment : Payment) => {
   const sql = `
   INSERT INTO payments 
@@ -57,11 +56,70 @@ export const createPayment = async(payment : Payment) => {
 
 //get all payment
 
-export const getAllPayment = async (paymentId : number) => {
+export const getAllPayment = async () => {
   const sql = `
   SELECT * FROM payments;
   `;
 
+  const [ result ] = await db.execute(sql);
+  return result;
+};
+
+//get by id
+
+export const getPaymentById = async (paymentId : number) => {
+  const sql = `
+  SELECT *
+  FROM payments
+  WHERE payment_id = ?
+  `;
+
+  const [ result ] = await db.execute(sql,[paymentId]);
+  return result;
+};
+
+//modify by id
+
+export const checkPaymentIdExists = async (paymentId : number) => {
+  const sql = `
+  SELECT * 
+  FROM payments
+  WHERE payment_id = ?
+  `;
+
   const [ result ] = await db.execute(sql, [paymentId]);
+  return result;
+
+}
+
+
+export const updatePaymentDetails = async(payment : Payment, paymentId : number) => {
+  const sql = `
+  UPDATE payments
+  SET amount = ?, payment_method = ?, payment_status = ?, transaction_id = ?, payment_date = ?
+  WHERE payment_id = ?
+  `;
+
+  const [ result ] = await db.execute(sql, [
+    payment.amount,
+    payment.payment_method,
+    payment.payment_status,
+    payment.transaction_id,
+    payment.payment_date,
+    paymentId
+  ]);
+  return result;
+};
+
+//get payment detail by booking id
+
+export const getPaymentByBookingId = async (boookingId : number) => {
+  const sql = `
+  SELECT *
+  FROM payments
+  WHERE booking_id = ?
+  `;
+
+  const [ result ] = await db.execute(sql,[boookingId]);
   return result;
 };
