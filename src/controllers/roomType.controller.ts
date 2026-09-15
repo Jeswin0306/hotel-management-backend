@@ -11,7 +11,7 @@ export const createRoomType = async (req : Request, res : Response) => {
 
     res.status(200).json({
       message : 'Room Type created Successfully',
-      data : result
+      data : roomType
     });
   } catch (Error) {
     console.log(Error);

@@ -6,6 +6,7 @@ import roomRouter from './routes/rooms.routes';
 import authRouter from './routes/auth.router';
 import bookingRouter from './routes/booking.routes';
 import paymentRouter from './routes/payment.routes';
+import dashboardRouter from './routes/dashboard.router';
 
 const app = express();
 app.use(express.json())
@@ -19,5 +20,6 @@ app.use('/api', roomRouter);
 app.use('/api', authRouter);
 app.use('/api', bookingRouter);
 app.use('/api', paymentRouter);
+app.use('/api', dashboardRouter)
 
 export default app;

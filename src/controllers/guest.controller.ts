@@ -96,7 +96,7 @@ export const updateGuest = async (req : Request, res : Response) => {
     } 
     res.status(200).json({
       message : "Guest Updated successfully",
-      data : result
+      data : guest
     });
   } catch(error) {
     console.log(error) 

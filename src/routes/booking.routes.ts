@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createBooking, getAllBooking, getBookingById, checkOut, cancelRoomBookings, updateBookingController } from '../controllers/booking.controller';
+import { authenticateToken, authorizeRole} from "../middleware/auth.middleware";
 
 const router = Router();
 
