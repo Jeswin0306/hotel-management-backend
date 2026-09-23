@@ -40,7 +40,7 @@ export const authenticateToken = (req : Request, res : Response, next : NextFunc
   }
 }; 
 
-export const authorizeRole = (allowedRole : string) => {
+export const authorizeRole = (allowedRole : string, allowedRole2 ?: string)  => {
   return (req : Request, res : Response, next : NextFunction) => {
     const user = (req as any).user;
 
@@ -50,7 +50,7 @@ export const authorizeRole = (allowedRole : string) => {
       });
     }
 
-  if(user.role !== allowedRole){
+  if(user.role !== allowedRole && user.role !== allowedRole2){
     return res.status(403).json({
       message : "Access denied"
     });
