@@ -11,3 +11,6 @@ router.put('/rooms/:id', authenticateToken, authorizeRole("MANAGER"), updateRoom
 router.delete('/rooms/:id', authenticateToken, authorizeRole("MANAGER"), deleteRoom);
 
 export default router;
+
+
+//ithu room ooda router so ithula endpoints ella irukum
