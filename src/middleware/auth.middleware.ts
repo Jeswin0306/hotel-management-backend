@@ -42,7 +42,7 @@ export const authenticateToken = (req : Request, res : Response, next : NextFunc
 
 export const authorizeRole = (allowedRole : string, allowedRole2 ?: string)  => {
   return (req : Request, res : Response, next : NextFunction) => {
-    const user = (req as any).user;
+    const user = (req as any).user;    
 
     if(!user){
       return res.status(401).json({

@@ -3,6 +3,25 @@ import { createRoomBooking, getBookingDetails, getBoookingId, checkOutBooking, c
 
 //create booking
 
+const getStatusCode = (message: string) : number => {
+  const statusMap : Record<string, number> = {
+    "Required field are missing": 400,
+    "Required fields are missing": 400,
+    "Invalid check-in and check-out date": 400,
+    "Number of guests exceeds room capacity": 400,
+
+    "Guest not found": 404,
+    "Room not found": 404,
+    "Booking not found": 404,
+
+    "Room is not available": 409,
+    "Room is already booked": 409,
+    "Room is already booked for these dates": 409,
+    "Booking is not active": 409,
+  };
+  return statusMap[message] || 500;
+}
+
 export const createBooking = async (req : Request, res : Response) => {
   try{
     const booking = req.body;
@@ -10,55 +29,18 @@ export const createBooking = async (req : Request, res : Response) => {
 
     return res.status(201).json({
       message : 'Booking created successfully',
-      data : result
+      data : booking
     });
   } catch(error : any){
 
-    console.log(error.message)
-    if(error.message === "Required field are missing"){
-      return res.status(400).json({
-        message : error.message
-      });
-    }
+    console.log(error);
 
-    if(error.message == "Guest not found"){
-      return res.status(404).json({
-        message : error.message
-      });
-    }
+    const statusCode = getStatusCode(error.message);
 
-    if(error.message === "Room not found"){
-      return res.status(404).json({
-        message : error.message
-      });
-    }
-
-    if(error.message === "Room is not available"){
-      return res.status(409).json({
-        message : error.message
-      });
-    }
-
-    if(error.message === "Invalid check-in and check-out date"){
-      return res.status(400).json({
-        message : error.message
-      });
-    }
-
-    if(error.message == "Room is already booked"){
-      return res.status(409).json({
-        message : error.message
-      });
-    }
-
-    if(error.message === "Number of guests exceeds room capacity"){
-      return res.status(400).json({
-        message : error.message
-      });
-    }
-
-    return res.status(500).json({
-      message : "Failed to create booking"
+    return res.status(statusCode).json({
+      message : statusCode === 500
+      ? "Failed to create booking"
+      : error.message,
     });
   }
 };
@@ -135,20 +117,13 @@ export const checkOut = async(req : Request, res :Response) => {
 
     console.log(error.message);
 
-    if(error.message === "Booking not found"){
-      return res.status(404).json({
-        message : error.message
-      });
-    }
+    const statusCode = getStatusCode(error.message);
 
-    if(error.message === "Booking is not active"){
-      return res.status(409).json({
-        message : error.message
-      });
-    }
-
-    return res.status(500).json({
-      message : "CheckOut failed "
+    return res.status(statusCode).json({
+      message : 
+      statusCode === 500
+      ? "Checkout failed"
+      : error.message
     });
   }
 };
@@ -205,62 +180,13 @@ export const updateBookingController = async (req: Request,res: Response) => {
 
     console.log(error);
 
-    if (
-      error.message ===
-      "Required fields are missing"
-    ) {
-      return res.status(400).json({
-        message: error.message
-      });
-    }
+    const statusCode = getStatusCode(error.message);
 
-    if (
-      error.message ===
-      "Booking not found"
-    ) {
-      return res.status(404).json({
-        message: error.message
-      });
-    }
-
-    if (
-      error.message ===
-      "Booking is not active"
-    ) {
-      return res.status(409).json({
-        message: error.message
-      });
-    }
-
-    if (
-      error.message ===
-      "Invalid check-in and check-out date"
-    ) {
-      return res.status(400).json({
-        message: error.message
-      });
-    }
-
-    if (
-      error.message ===
-      "Number of guests exceeds room capacity"
-    ) {
-      return res.status(400).json({
-        message: error.message
-      });
-    }
-
-    if (
-      error.message ===
-      "Room is already booked for these dates"
-    ) {
-      return res.status(409).json({
-        message: error.message
-      });
-    }
-
-    return res.status(500).json({
-      message: "Failed to update booking"
-    });
+    return res.status(statusCode).json({
+      message : 
+      statusCode === 500
+      ? "Filed to cancel booking"
+      : error.messaage,
+    })
   }
 };

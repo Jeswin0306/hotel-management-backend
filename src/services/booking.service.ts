@@ -136,7 +136,6 @@ export const checkOutBooking = async (bookingId : number) => {
   }
 
   const bookingResult = (result as any[])[0];
-  // console.log(bookingResult);
 
   if(bookingResult.booking_status !== "CONFIRMED"){
     throw new Error("Booking is not active")
