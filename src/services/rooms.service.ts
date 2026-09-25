@@ -21,7 +21,7 @@ export const addRoom = async (room : Room) => {
 
   const existingRoom = await checkRoomNumberExists(room.room_number);
   if((existingRoom as any[]).length > 0){
-    throw new Error ("room number already exist")
+    throw new Error ("Room number is already exist")
   }
 
   const result = await createRoom(room);
@@ -52,7 +52,7 @@ export const modifyRoom = async (roomId : number, room : Room) => {
     !room.room_type_id ||
     !room.floor_number 
   ) {
-    throw new Error ("Required fied are missing");
+    throw new Error ("Required fields are missing");
   }
 
    const roomType = await checkRoomTypeExists(

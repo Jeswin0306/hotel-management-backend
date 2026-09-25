@@ -24,8 +24,6 @@ export const addGuest = async (guest : Guest) => {
   return result;
 };
 
-
-
 //get the all guest
 
 export const fetchAllGuest = async () => {

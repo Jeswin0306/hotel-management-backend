@@ -73,7 +73,10 @@ export const getRoomById = async (roomId : number) => {
 
 export const checkRoomNumberExistForUpdate = async (roomNumber : number, roomId : number) => {
   const sql = `
-  SELECT room_id FROM rooms WHERE room_number = ? AND room_id != ?
+  SELECT room_id 
+  FROM rooms 
+  WHERE room_number = ? 
+  AND room_id != ?
   `;
 
   const [ rows ] = await db.execute(sql, [
@@ -86,7 +89,8 @@ export const checkRoomNumberExistForUpdate = async (roomNumber : number, roomId 
 export const updateRoom = async (roomId : number, room : Room) => {
   const sql = `
   UPDATE rooms
-  SET room_number = ?, room_type_id = ?, floor_number = ?, status = ? WHERE room_id = ?
+  SET room_number = ?, 
+  room_type_id = ?, floor_number = ?, status = ? WHERE room_id = ?
   `;
 
   const [ rows ] = await db.execute(sql,[

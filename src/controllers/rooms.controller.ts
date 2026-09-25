@@ -1,181 +1,166 @@
 import { Request, Response } from "express";
-import { addRoom, getAllRooms, fetchRoomById, modifyRoom,removeRoom } from '../services/rooms.service';
+import { addRoom, getAllRooms, fetchRoomById, modifyRoom, removeRoom } from "../services/rooms.service";
 
-//add rooms
-
-export const createRoom = async (req :Request, res : Response) => {
+// Create room
+export const createRoom = async (req: Request, res: Response) => {
   try {
-    const room = req.body;
-    
-    const result = await addRoom(room);
-    res.status(200).json({
-      message : "Room Created Successfully",
-      data : result
+    const result = req.body;
+
+    const room = await addRoom(result);
+
+    return res.status(201).json({
+      message: "Room created successfully",
+      data: result
     });
-  } catch (error : any){
+
+  } catch (error: any) {
     console.log(error);
 
-    if(error.message === 'required field are missing'){
-      res.status(400).json({
-        message  : 'required field are missing'
-      });
+    const errors: Record<string, [number, string]> = {
+      "required field are missing": [400, "Required fields are missing"],
+      "Room type not found": [404, "Room type not found"],
+      "Room number is already exist": [409, "Room number already exists"]
+    };
+
+    if (errors[error.message]) {
+      const [status, message] = errors[error.message];
+      return res.status(status).json({ message });
     }
 
-    if(error.message === "Room type not found"){
-      res.status(404).json({
-        message : "Room type is not found"
-      });
-    }
-
-    if(error.message === 'Room number is already exist'){
-      res.status(409).json({
-        message : 'Room number is already exist'
-      });
-    }
-
-    res.status(500).json({
-      message : 'failed to create room'
+    return res.status(500).json({
+      message: "Failed to create room"
     });
   }
 };
 
-//get all rooms
 
-export const getRooms = async (req : Request, res : Response) => {
+// Get all rooms
+export const getRooms = async (req: Request, res: Response) => {
   try {
-
     const result = await getAllRooms();
 
-    res.status(200).json({
-      message : "reterived rooms",
-      data : result
+    return res.status(200).json({
+      message: "Rooms retrieved successfully",
+      data: result
     });
-  } catch (Error) {
-    res.status(500).json({
-      message : "failed to reterive data"
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to retrieve rooms"
     });
   }
 };
 
-//get rooms by id
 
-export const getRoomById = async (req : Request, res : Response) => {
-  try{
+// Get room by ID
+export const getRoomById = async (req: Request, res: Response) => {
+  try {
     const id = Number(req.params.id);
-    if(isNaN(id)){
+
+    if (isNaN(id)) {
       return res.status(400).json({
-        message : 'Invalid room ID'
+        message: "Invalid room ID"
       });
     }
 
     const result = await fetchRoomById(id);
-    if((result as any []).length === 0){
+
+    if ((result as any[]).length === 0) {
       return res.status(404).json({
-        message : "Room id not found"
-      });
-    }
-
-    res.status(200).json({
-      message : "Room Reterived successfully",
-      data : result
-    });
-  } catch(error : any){
-    console.log(error.message);
-
-    res.status(500).json({
-      message : "Faild to reterived room"
-    });
-  }
-};
-
-// modify room
-
-export const updateRoom = async (req : Request, res : Response) => {
-  try{
-    
-    const id = Number(req.params.id);
-
-    if(isNaN(id)){
-      return res.status(400).json({
-        message : "Invalid Room Id" 
-      });
-    }
-
-    const room = req.body;
-
-    const result = await modifyRoom(id, room);
-    if((result as any).affectedRows === 0){
-      return res.status(404).json({
-        message : "Room ID not found"
+        message: "Room ID not found"
       });
     }
 
     return res.status(200).json({
-      message : 'room updated successfully'
+      message: "Room retrieved successfully",
+      data: result
     });
-    
-  } catch (error : any){
+
+  } catch (error) {
     console.log(error);
 
-    if(error.message === 'Required fields are missing'){
-      return res.status(400).json({
-        message : error.message
-      });
-    }
-
-    if (error.message === "Room type not found") {
-      return res.status(404).json({
-        message: error.message
-      });
-    }
-
-    if(error.message === 'Room Number already exists'){
-      return res.status(409).json({
-        message : error.message
-      });
-    }
-
     return res.status(500).json({
-      message : "failed to update room"
+      message: "Failed to retrieve room"
     });
   }
 };
 
-//delete room
 
-export const deleteRoom = async (req : Request, res : Response) => {
+// Update room
+export const updateRoom = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
 
-    if(isNaN(id)){
+    if (isNaN(id)) {
       return res.status(400).json({
-        message : 'Invalid Room number'
+        message: "Invalid room ID"
+      });
+    }
+    
+    const result = req.body;
+
+    const roomupdate = await modifyRoom(id, result);
+
+    if ((result as any).affectedRows === 0) {
+      return res.status(404).json({
+        message: "Room ID not found"
+      });
+    }
+
+    return res.status(200).json({
+      message: "Room updated successfully",
+      data : result
+    });
+
+  } catch (error: any) {
+    console.log(error);
+
+    const errors: Record<string, [number, string]> = {
+      "Required fields are missing": [400, "Required fields are missing"],
+      "Room type not found": [404, "Room type not found"],
+      "Room Number already exists": [409, "Room Number already exists"]
+    };
+
+    if (errors[error.message]) {
+      const [status, message] = errors[error.message];
+      return res.status(status).json({ message });
+    }
+
+    return res.status(500).json({
+      message: "Failed to update room"
+    });
+  }
+};
+
+
+// Delete room
+export const deleteRoom = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (isNaN(id)) {
+      return res.status(400).json({
+        message: "Invalid room ID"
       });
     }
 
     const result = await removeRoom(id);
 
-    if((result as any).affectedRows === 0){
+    if ((result as any).affectedRows === 0) {
       return res.status(404).json({
-        message : 'Room not founded'
+        message: "Room not found"
       });
     }
-    
-    return res.status(200).json({
-      message : 'Room deleted Successfully',
-      data : result
-    });
-  } catch (error : any){
-    console.log(error.message);
 
-    if(error.message === 'Room not found'){
-      return res.status(404).json({
-        message : error.message
-      });
-    }
+    return res.status(200).json({
+      message: "Room deleted successfully"
+    });
+
+  } catch (error: any) {
+    console.log(error);
 
     return res.status(500).json({
-      message : "Failed to delete room"
+      message: "Failed to delete room"
     });
   }
-}
+};
