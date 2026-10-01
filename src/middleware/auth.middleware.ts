@@ -25,7 +25,7 @@ export const authenticateToken = (req : Request, res : Response, next : NextFunc
       process.env.JWT_SECRET as string
     );
 
-    console.log('Decoded token: ',decoded);
+    // console.log('Decoded token: ',decoded);
 
     (req as any).user = decoded;
     next();
@@ -40,7 +40,7 @@ export const authenticateToken = (req : Request, res : Response, next : NextFunc
   }
 }; 
 
-export const authorizeRole = (allowedRole : string, allowedRole2 ?: string)  => {
+export const authorizeRole = (allowedRole1 : string, allowedRole2 ?: string)  => {
   return (req : Request, res : Response, next : NextFunction) => {
     const user = (req as any).user;    
 
@@ -50,7 +50,7 @@ export const authorizeRole = (allowedRole : string, allowedRole2 ?: string)  => 
       });
     }
 
-  if(user.role !== allowedRole && user.role !== allowedRole2){
+  if(user.role !== allowedRole1 && user.role !== allowedRole2){
     return res.status(403).json({
       message : "Access denied"
     });
